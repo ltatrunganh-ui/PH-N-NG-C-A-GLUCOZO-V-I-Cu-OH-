@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>STEM: Glucozơ + Cu(OH)₂</title>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        :root {
+            --bg: #121212;
+            --panel: #fffde7;
+            --cu-blue: #00d2ff;
+            --cu-ppt: #81ecec;
+            --complex: #0000cd;
+            --brick-red: #d63031;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: radial-gradient(circle, #2c3e50, #000);
+            color: #fff; margin: 0; height: 100vh; display: flex; overflow: hidden;
+        }
+
+        /* --- BỐ CỤC --- */
+        .left-zone { width: 66%; display: flex; flex-direction: column; border-right: 1px solid rgba(255,255,255,0.1); position: relative; }
+        .right-zone { width: 34%; background: var(--panel); color: #333; padding: 20px; display: flex; flex-direction: column; gap: 12px; box-shadow: -5px 0 20px rgba(0,0,0,0.5); overflow-y: auto; }
+
+        /* --- HEADER & NHẠC --- */
+        .header { padding: 15px; text-align: center; background: rgba(0,0,0,0.5); }
+        .music-ctrl { margin-bottom: 8px; }
+        .btn-music { background: transparent; border: 1px solid #ff7675; color: #ff7675; padding: 4px 12px; border-radius: 20px; cursor: pointer; font-size: 0.8rem; transition: 0.3s; }
+        .btn-music:hover { background: #ff7675; color: #fff; }
+        .title-sub { color: #f1c40f; font-size: 1.4rem; font-weight: bold; margin: 5px 0; text-shadow: 2px 2px 4px #000; }
+
+        /* --- KHU VỰC THÍ NGHIỆM --- */
+        .lab-space { flex: 1; position: relative; display: flex; justify-content: center; align-items: center; }
+
+        /* Khung giải thích bên trái */
+        .explainer-menu { position: absolute; left: 20px; top: 50%; transform: translateY(-50%); display: flex; flex-direction: column; gap: 10px; z-index: 30; }
+        .exp-card { 
+            width: 220px; padding: 12px; border-radius: 8px; border: none; color: white; 
+            font-weight: bold; cursor: pointer; transition: 0.3s; box-shadow: 4px 4px 15px rgba(0,0,0,0.4);
+        }
+        .exp-card:hover { transform: scale(1.05); filter: brightness(1.2); }
+        #details-box { 
+            margin-top: 15px; background: rgba(255, 255, 255, 0.95); color: #222; 
+            padding: 15px; border-radius: 8px; font-size: 0.9rem; display: none; line-height: 1.4;
+            border-left: 5px solid #2ecc71; box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+        }
+
+        /* Dụng cụ */
+        .tube-container { position: relative; width: 120px; height: 300px; display: flex; justify-content: center; }
+        .test-tube {
+            position: absolute; bottom: 60px; width: 45px; height: 200px;
+            border: 2px solid rgba(255,255,255,0.4); border-radius: 0 0 25px 25px;
+            background: rgba(255,255,255,0.1); overflow: hidden; z-index: 10; backdrop-filter: blur(2px);
+        }
+        .liquid { position: absolute; bottom: 0; width: 100%; height: 0; transition: 1s ease; }
+        
+        /* Hiệu ứng bột kết tủa */
+        .precipitate {
+            position: absolute; bottom: 0; width: 100%; height: 0; opacity: 0; transition: 1s;
+            background-image: radial-gradient(#fff 1px, transparent 1px);
+            background-size: 4px 4px;
+        }
+
+        .shaking { animation: shake-tube 0.15s ease-in-out 6; }
+        @keyframes shake-tube { 0%, 100% { transform: rotate(0); } 50% { transform: rotate(8deg); } }
+
+        .burner { position: absolute; bottom: -10px; width: 70px; height: 55px; background: #333; border-radius: 10px; }
+        .flame {
+            position: absolute; top: -40px; left: 20px; width: 30px; height: 50px;
+            background: radial-gradient(circle at bottom, #fff, #f1c40f, transparent);
+            border-radius: 50% 50% 20% 20%; filter: blur(2px); animation: flicker 0.1s infinite alternate; display: none;
+        }
+        @keyframes flicker { from { transform: scale(1); } to { transform: scale(1.1); } }
+
+        /* --- BÊN PHẢI: HÓA CHẤT --- */
+        .chem-title { color: #27ae60; font-weight: bold; border-bottom: 2px solid #ddd; text-align: center; padding-bottom: 5px; }
+        .chem-btn {
+            background: #fff; border-radius: 12px; padding: 12px; display: flex; align-items: center; gap: 12px;
+            cursor: pointer; border: 1px solid #ddd; transition: 0.2s; box-shadow: 0 5px 0 #bc8f00;
+        }
+        .chem-btn:active:not(:disabled) { transform: translateY(3px); box-shadow: 0 2px 0 #bc8f00; }
+        .chem-btn:disabled { opacity: 0.5; cursor: not-allowed; filter: grayscale(1); }
+        
+        .safety-box { background: #fff3cd; border-left: 5px solid #ffc107; padding: 12px; border-radius: 6px; font-size: 0.85rem; margin-top: auto; color: #856404; }
+    </style>
+</head>
+<body>
+
+<div class="left-zone">
+    <div class="header">
+        <div class="music-ctrl">
+            <button class="btn-music">🌸 Bật / Tắt nhạc</button>
+            <button class="btn-music">🌼 Mở nhạc (mp3)</button>
+        </div>
+        <div style="color: #00d2ff; font-weight: bold; font-size: 0.9rem;">⚗️ KHÁM PHÁ TÍNH CHẤT HÓA HỌC CỦA GLUCOZO</div>
+        <h1 class="title-sub">🧪 PHẢN ỨNG CỦA GLUCOZO VỚI Cu(OH)₂</h1>
+    </div>
+
+    <div class="lab-space">
+        <div class="explainer-menu">
+            <button class="exp-card" style="background: #3498db;" onclick="showDetail(1)">🔹 Bước 1: Tạo Cu(OH)₂</button>
+            <button class="exp-card" style="background: #2980b9;" onclick="showDetail(2)">🔹 Bước 2: Tạo phức xanh lam</button>
+            <button class="exp-card" style="background: #c0392b;" onclick="showDetail(3)">🔹 Bước 3: Phản ứng tráng đồng</button>
+            <div id="details-box"></div>
+        </div>
+
+        <div class="tube-container" id="tube-wrap">
+            <div class="test-tube">
+                <div id="liquid-bg" class="liquid"></div>
+                <div id="ppt-layer" class="precipitate"></div>
+            </div>
+            <div class="burner">
+                <div class="flame" id="flame-img"></div>
+            </div>
+        </div>
+    </div>
+
+    <div style="background: rgba(0,0,0,0.85); padding: 15px; text-align: center; border-top: 3px solid #2ecc71; min-height: 80px;" id="eq-box">
+        Hệ thống sẵn sàng. Vui lòng thêm CuSO₄.
+    </div>
+</div>
+
+<div class="right-zone">
+    <div class="chem-title">🧪 HÓA CHẤT THÍ NGHIỆM</div>
+    
+    <button class="chem-btn" id="c1" onclick="step1()">
+        <span style="font-size: 2rem;">🍶</span>
+        <div><b>1️⃣ CuSO₄ 0,5M</b><br><small>Thêm 2ml dung dịch</small></div>
+    </button>
+
+    <button class="chem-btn" id="c2" onclick="step2()" disabled>
+        <span style="font-size: 2rem;">🧪</span>
+        <div><b>2️⃣ NaOH 1M</b><br><small>Thêm 4ml dung dịch</small></div>
+    </button>
+
+    <button class="chem-btn" id="c3" onclick="step3()" disabled>
+        <span style="font-size: 2rem;">🍭</span>
+        <div><b>3️⃣ Glucozo 0,1M</b><br><small>Thêm 2ml & Lắc đều</small></div>
+    </button>
+
+    <button class="chem-btn" id="c4" onclick="step4()" disabled>
+        <span style="font-size: 2rem;">🔥</span>
+        <div><b>Icon Đun nóng</b><br><small>Phản ứng oxy hóa khử</small></div>
+    </button>
+
+    <div class="safety-box">
+        ⚠️ <b>KHUNG LƯU Ý KIẾN THỨC:</b><br>
+        • Chứng tỏ glucozo có nhiều nhóm –OH liền kề.<br>
+        • Khi đun nóng, glucozo thể hiện tính khử mạnh.<br>
+        • Phản ứng đặc trưng để nhận biết Glucozơ.
+    </div>
+
+    <button onclick="location.reload()" style="background: #e74c3c; color: white; border: none; padding: 12px; border-radius: 8px; cursor: pointer; font-weight: bold;">🔄 Làm lại thí nghiệm</button>
+</div>
+
+<script>
+    const liq = document.getElementById('liquid-bg');
+    const ppt = document.getElementById('ppt-layer');
+    const eq = document.getElementById('eq-box');
+    const flame = document.getElementById('flame-img');
+    const det = document.getElementById('details-box');
+
+    function step1() {
+        liq.style.height = '20%';
+        liq.style.background = 'rgba(0, 210, 255, 0.5)';
+        eq.innerHTML = 'Đã thêm dung dịch CuSO₄ màu xanh lam.';
+        document.getElementById('c1').disabled = true;
+        document.getElementById('c2').disabled = false;
+    }
+
+    function step2() {
+        liq.style.height = '45%';
+        ppt.style.height = '45%';
+        ppt.style.opacity = '1';
+        ppt.style.backgroundColor = 'rgba(129, 236, 236, 0.7)'; // Xanh nhạt
+        eq.innerHTML = '$$\\mathrm{Cu^{2+} + 2OH^- \\rightarrow Cu(OH)_2 \\downarrow}$$ (Kết tủa xanh nhạt)';
+        MathJax.typeset();
+        document.getElementById('c2').disabled = true;
+        document.getElementById('c3').disabled = false;
+    }
+
+    function step3() {
+        document.getElementById('tube-wrap').classList.add('shaking');
+        setTimeout(() => {
+            document.getElementById('tube-wrap').classList.remove('shaking');
+            ppt.style.opacity = '0'; // Kết tủa tan
+            liq.style.background = 'rgba(0, 0, 139, 0.9)'; // Xanh thẫm
+            eq.innerHTML = '$$\\mathrm{2C_6H_{12}O_6 + Cu(OH)_2 \\rightarrow (C_6H_{11}O_6)_2Cu + 2H_2O}$$ (Phức xanh thẫm)';
+            MathJax.typeset();
+            document.getElementById('c3').disabled = true;
+            document.getElementById('c4').disabled = false;
+        }, 1200);
+    }
+
+    function step4() {
+        flame.style.display = 'block';
+        eq.innerHTML = 'Đang đun nóng... hãy quan sát sự hình thành bột đỏ...';
+        setTimeout(() => {
+            liq.style.background = 'transparent';
+            ppt.style.height = '50%';
+            ppt.style.opacity = '1';
+            // Tạo hiệu ứng bột đỏ gạch (gradient hạt)
+            ppt.style.background = 'radial-gradient(circle, #b22222 1px, #d63031 2px)';
+            ppt.style.backgroundSize = '3px 3px';
+            eq.innerHTML = '$$\\mathrm{C_6H_{12}O_6 + 2Cu(OH)_2 \\xrightarrow{t^\\circ} C_6H_{12}O_7 + Cu_2O \\downarrow + 2H_2O}$$ (Bột đỏ gạch)';
+            MathJax.typeset();
+            document.getElementById('c4').disabled = true;
+        }, 3500);
+    }
+
+    function showDetail(id) {
+        det.style.display = 'block';
+        if(id === 1) {
+            det.innerHTML = "<b>Tại sao tạo Cu(OH)₂?</b> Glucozơ phản ứng tốt nhất với Cu(OH)₂ mới điều chế (dạng huyền phù) để đảm bảo bề mặt tiếp xúc lớn nhất.";
+        } else if(id === 2) {
+            det.innerHTML = "<b>Vai trò nhóm -OH:</b> Phân tử glucozơ có 5 nhóm -OH, trong đó các nhóm -OH liền kề cho phép nó tạo phức vòng với Cu(II), tương tự như Glycerol.";
+        } else {
+            det.innerHTML = "<b>Tính khử:</b> Ở nhiệt độ cao, nhóm anđehit (-CHO) của Glucozơ khử đồng (II) xuống đồng (I). Đây là phản ứng quan trọng để phân biệt Glucozơ với Saccarozơ.";
+        }
+    }
+</script>
+
+</body>
+</html>
